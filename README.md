@@ -234,7 +234,7 @@ When you run `python excel_report.py`, it generates a fully formatted Excel file
 After processing, each image gets annotated and saved:
 
 ```
-[PROCESSED] bike1_front.jpg | Plate: TN 09 BT 9721 | Violations: ['NO_HELMET'] | Fine: ₹1000
+[PROCESSED] bike1.jpg | Plate: TN 09 BT 9721 | Violations: ['NO_HELMET'] | Fine: ₹1000
   ⚠️  VIOLATION LOGGED → violations/log.json
 ```
 
@@ -269,3 +269,5 @@ Annotated image shows:
 - ✅ Creates awareness of AI in government → **people follow rules voluntarily**
 
 ---
+
+##Thank you Team DetectX
