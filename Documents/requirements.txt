@@ -1,0 +1,13 @@
+Required Libraries:
+--> flask
+--> cv2
+--> numpy
+--> base64
+--> os
+--> json
+--> pandas
+--> ultralytics
+--> mediapipe
+--> easyocr
+--> datetime
+--> openyxl

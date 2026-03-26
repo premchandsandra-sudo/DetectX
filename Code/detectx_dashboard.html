@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DetectX — Challan System</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel = "stylesheet" href = "detectx_dashboard.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo">
+    <span class="logo-text">Detect<span>X</span></span>
+  </div>
+  <div class="header-right">
+    <div class="server-status">
+      <div class="server-dot" id="server-dot"></div>
+      <span id="server-text">Checking server...</span>
+    </div>
+    <div class="live-badge"><div class="pulse"></div>Live System</div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="stats">
+    <div class="stat red"><div class="stat-label">Total Challans</div><div class="stat-value" id="stat-total">0</div></div>
+    <div class="stat amber"><div class="stat-label">Total Fines (₹)</div><div class="stat-value" id="stat-fines">0</div></div>
+    <div class="stat blue"><div class="stat-label">No Helmet</div><div class="stat-value" id="stat-helmet">0</div></div>
+    <div class="stat green"><div class="stat-label">Triple Riding</div><div class="stat-value" id="stat-overload">0</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Detection</span>
+      </div>
+      <div class="card-body">
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('ai')">Image Analysis</button>
+          <button class="tab" onclick="switchTab('manual')">Manual Entry</button>
+        </div>
+        <div class="tab-pane active" id="pane-ai">
+
+          <div class="offline-warn" id="offline-warn">
+            ⚠ Python server not running. Start it first:<br/>
+            <code>pip install flask ultralytics mediapipe easyocr opencv-python openpyxl pillow</code><br/>
+            <code>python detectx_server.py</code><br/>
+            Then refresh this page.
+          </div>
+          <div id="upload-zone" class="upload-zone"
+               onclick="document.getElementById('file-in').click()"
+               ondragover="event.preventDefault();this.classList.add('drag')"
+               ondragleave="this.classList.remove('drag')"
+               ondrop="onDrop(event)">
+            <div class="upload-icon">📷</div>
+            <div class="upload-main">Upload traffic image</div>
+            <div class="upload-sub">Click to select or drag &amp; drop · JPG, PNG, WEBP</div>
+          </div>
+          <input type="file" id="file-in" accept="image/*" onchange="onFile(event)"/>
+          <div id="preview-wrap" class="preview-wrap" style="margin-top:10px">
+            <img id="preview" class="preview-img"/>
+            <div class="preview-change" onclick="resetUpload()">✕ Change</div>
+          </div>
+
+          <div class="analyzing" id="analyzing">
+            <div class="spinner-big"></div>
+            <div class="analyzing-text">Analyzing image...</div>
+            <div class="analyzing-sub">Running YOLOv8 · MediaPipe · EasyOCR</div>
+          </div>
+
+          <!-- Results -->
+          <div class="result-panel" id="result-panel">
+            <div class="result-summary" id="result-summary"></div>
+            <img id="result-img" class="result-img" style="display:none"/>
+            <div id="v-cards" class="v-cards"></div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn primary" id="analyze-btn" onclick="analyzeImage()" disabled>
+              <div class="spinner" id="spin"></div>Analyze Image
+            </button>
+            <button class="btn ghost" id="reset-btn" onclick="resetAll()" style="display:none">Reset</button>
+          </div>
+        </div>
+
+        <!-- Manual tab -->
+        <div class="tab-pane" id="pane-manual">
+          <div class="v-badges">
+            <div class="vbadge" id="v1" onclick="toggleV(1)"><div class="vcheck"></div><span class="vtext">Driver with no helmet</span><span class="vfine">₹1,000</span></div>
+            <div class="vbadge" id="v2" onclick="toggleV(2)"><div class="vcheck"></div><span class="vtext">More than 2 persons on bike</span><span class="vfine">₹1,000</span></div>
+          </div>
+          <label class="field-label">Number Plate</label>
+          <input class="plate-input" id="m-plate" placeholder="TN 09 BT 9721" maxlength="14" oninput="onPlate(this)"/>
+          <div class="cd-warn" id="m-warn"></div>
+          <div class="fine-preview" id="m-fine">
+            <span class="fine-label">Calculated Fine</span>
+            <span class="fine-amt" id="m-fine-val">₹0</span>
+          </div>
+          <div class="btn-row">
+            <button class="btn primary" id="m-btn" onclick="manualChallan()" disabled>Generate Challan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Challan Log -->
+    <div class="card">
+      <div class="card-head"><div class="card-icon ic-blue">📋</div><span class="card-title">Challan Log</span></div>
+      <div class="card-body" style="padding-bottom:0">
+        <div class="log-scroll">
+          <table class="log-table">
+            <thead><tr><th>S.No</th><th>Snapshot</th><th>Plate</th><th>Violation</th><th>Fine</th><th>Challan No.</th><th>Time</th></tr></thead>
+            <tbody id="log-body"><tr><td colspan="7" class="empty-cell">No challans yet.</td></tr></tbody>
+          </table>
+        </div>
+        <div style="padding:1rem">
+          <div class="btn-row">
+            <button class="btn success" onclick="exportXL()" id="xl-btn" disabled>⬇ Export Excel</button>
+            <button class="btn ghost" onclick="clearAll()" id="clr-btn" style="display:none">Clear All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cooldown -->
+    <div class="card cd-card">
+      <div class="card-head"><div class="card-icon ic-blue">⏱</div><span class="card-title">Cooldown Tracker — 4-Hour Rule</span></div>
+      <div class="card-body">
+        <div id="cd-empty" class="cd-empty">No active cooldowns.</div>
+        <div id="cd-list" class="cd-list" style="display:none"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div id="toasts"></div>
+<script src="detectx_dashboard.js"></script>
+</body>
+</html>
