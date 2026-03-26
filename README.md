@@ -270,4 +270,4 @@ Annotated image shows:
 
 ---
 
-##Thank you Team DetectX
+## Thankyou Team DetectX
