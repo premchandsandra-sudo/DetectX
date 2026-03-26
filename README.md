@@ -185,9 +185,9 @@ AP  02  AB  1234
 ```
 
 **Accepted formats:** - Samples
-- `AP 02 AB 1234` (with spaces)
-- `AP02AB1234` (without spaces)
-- `TN 09 BT 9721` (any state)
+- `AP XX AB XXXX` (with spaces)
+- `APXXABXXXX` (without spaces)
+- `TN XX XX XXXX` (any state)
 
 ---
 
