@@ -176,7 +176,7 @@ The system validates and reads standard Indian number plate format:
 
 **Example:**
 ```
-AP  02  AB  1234
+AP  XX  AB  XXXX
 │   │   │   │
 │   │   │   └── 4-digit serial number
 │   │   └────── 1-2 letter series code
