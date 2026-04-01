@@ -271,3 +271,5 @@ Annotated image shows:
 ---
 
 **Thankyou Team DetectX**
+-->Sandra Prem Chand (L)
+-->Muttukuri Dileep Muni Kumar
